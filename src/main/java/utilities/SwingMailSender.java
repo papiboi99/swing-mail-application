@@ -1,5 +1,7 @@
 package utilities;
 
+import model.Mail;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import java.io.File;
@@ -8,6 +10,5 @@ import java.util.Properties;
 
 public interface SwingMailSender {
 
-    void sendEmail(Properties smtpProperties, String toAddress,
-                   String subject, String message, File[] attachFiles);
+    void sendMail (Properties smtpProperties, Mail mail);
 }

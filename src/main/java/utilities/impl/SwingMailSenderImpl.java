@@ -1,22 +1,19 @@
 package utilities.impl;
 
+import model.Mail;
 import utilities.SwingMailSender;
 
 import javax.mail.*;
 import javax.mail.internet.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Properties;
 
+//String toAddress, String subject, String message, File[] attachFiles
 public class SwingMailSenderImpl implements SwingMailSender {
-
-    public void sendEmail(Properties smtpProperties, String toAddress,
-                          String subject, String message, File[] attachFiles) {
-
+    public void sendMail (Properties smtpProperties, Mail mail) {
         final String userName = smtpProperties.getProperty("mail.user");
         final String password = smtpProperties.getProperty("mail.password");
-
 
         try {
             // creates a new session with an authenticator
@@ -30,23 +27,35 @@ public class SwingMailSenderImpl implements SwingMailSender {
             // creates a new e-mail message
             Message msg = new MimeMessage(session);
 
+            InternetAddress[] toAddresses = new InternetAddress[mail.getTo().length];
+            for (int i = 0; i < mail.getTo().length; i++ ){
+                toAddresses[i] = new InternetAddress(mail.getTo()[i]);
+            }
+
+            if (mail.getCc() != null && mail.getCc().length > 0) {
+                InternetAddress[] ccAddresses = new InternetAddress[mail.getCc().length];
+                for (int i = 0; i < mail.getCc().length; i++) {
+                    ccAddresses[i] = new InternetAddress(mail.getCc()[i]);
+                }
+                msg.setRecipients(Message.RecipientType.CC, ccAddresses);
+            }
+
             msg.setFrom(new InternetAddress(userName));
-            InternetAddress[] toAddresses = { new InternetAddress(toAddress) };
             msg.setRecipients(Message.RecipientType.TO, toAddresses);
-            msg.setSubject(subject);
-            msg.setSentDate(new Date());
+            msg.setSubject(mail.getSubject());
+            msg.setSentDate(mail.getDate());
 
             // creates message part
             MimeBodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setContent(message, "text/html");
+            messageBodyPart.setContent(mail.getText(), "text/html");
 
             // creates multi-part
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(messageBodyPart);
 
             // adds attachments
-            if (attachFiles != null && attachFiles.length > 0) {
-                for (File aFile : attachFiles) {
+            if (mail.getAttachments() != null && mail.getAttachments().length > 0) {
+                for (File aFile : mail.getAttachments()) {
                     MimeBodyPart attachPart = new MimeBodyPart();
 
                     try {
@@ -64,6 +73,8 @@ public class SwingMailSenderImpl implements SwingMailSender {
 
             // sends the e-mail
             Transport.send(msg);
+        } catch (AddressException e){
+
         } catch (MessagingException e) {
 
         } catch (IOException e) {
