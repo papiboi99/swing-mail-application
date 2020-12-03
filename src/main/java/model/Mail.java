@@ -1,6 +1,7 @@
 package model;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 
 public class Mail {
@@ -27,5 +28,18 @@ public class Mail {
     public void setAttachments(File[] attachments) { this.attachments = attachments; }
     public Date getDate() { return date; }
     public void setDate(Date date) { this.date = date; }
+
+    @Override
+    public String toString() {
+        return "Mail{" +
+                "to=" + Arrays.toString(to) +
+                ", cc=" + Arrays.toString(cc) +
+                ", from='" + from + '\'' +
+                ", subject='" + subject + '\'' +
+                ", text='" + text + '\'' +
+                ", attachments=" + Arrays.toString(attachments) +
+                ", date=" + date +
+                '}';
+    }
 
 }

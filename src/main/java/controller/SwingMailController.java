@@ -1,7 +1,9 @@
 package controller;
 
 import model.Mail;
+import utilities.SwingMailReceiver;
 import utilities.SwingMailSender;
+import utilities.impl.SwingMailReceiverImpl;
 import utilities.impl.SwingMailSenderImpl;
 
 import java.io.IOException;
@@ -32,7 +34,7 @@ public class SwingMailController {
         } catch (IOException ex) {
 
         }
-
+/*
         String[] to = {"youssef3456@gmail.com"};
         Mail mail = new Mail ();
 
@@ -41,12 +43,37 @@ public class SwingMailController {
         mail.setSubject("test");
         mail.setText("test");
 
-        mailSender.sendMail(smtpProperties, mail);
+        mailSender.sendMail(smtpProperties, mail);*/
+        SwingMailReceiver mailReceiver = new SwingMailReceiverImpl();
+        Properties imapProperties = new Properties();
+        try {
+            InputStream input =
+                    SwingMailController.class.getClassLoader().getResourceAsStream("imap.properties");
+
+            if (input == null) {
+                System.out.println("Sorry, unable to find config.properties");
+                return;
+            }
+
+            //load a properties file from class path, inside static method
+            imapProperties.load(input);
+
+        } catch (IOException ex) {
+
+        }
+
+        mailReceiver.receiveEmail(imapProperties);
+
+
+
+
+
 
         /*javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowGUI();
             }
         });*/
+
     }
 }
