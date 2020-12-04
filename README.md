@@ -5,36 +5,49 @@
 
 ### Gmail SMTP as our way to send mails
 
-To use Gmail SMTP free server you will have to allow him the access from lower secure external apps [here](https://myaccount.google.com/u/0/lesssecureapps?pli=1).
+To use Gmail SMTP free server you will have to allow him the access from less secure external apps [here](https://myaccount.google.com/u/0/lesssecureapps?pli=1).
 
 An example format would be:
 
 **SMTP Server:** *smtp.gmail.com*  
 **SMTP User:** Your complete Gmail user (email) *yourmail@gmail.com*  
 **SMTP Password:** Your Gmail password   
-**SMTP Port:** Default port fot TLS *587*  
+**SMTP Port:** Default port forTLS *587*  
 
+### Gmail IMAP as our way to import mails
 
+To use Gmail IMAP you will have to enable the access from the Gmail configurations, follow the instructions [here](https://support.google.com/mail/answer/7126229?hl=es)
+
+An example format would be:  
+
+**IMAP Server:** *imap.gmail.com*  
+**IMAP User:** Your complete Gmail user (email) *yourmail@gmail.com*  
+**IMAP Password:** Your Gmail password  
+**IMAP Port:** Default port for TLS *997*  
 
 ## IMPLEMENTATIONS TO DO LIST
-1. Swing UI
+1. Swing GUI (eMail sending & viewing)
    
-   - MailBox - general (default: received)
-   - Sent section
-   - Received section
-   - eMail sending
-   - eMail viewing
-   - properties configuration
+   - Login menu
+   - MailBox menu
+     - Folders:  
+       -- Inbox  
+       -- Sent  
+       -- Spam  
+       -- Trash
+     - Send mail option
+     - Logout option
+     - Mail list view
+     - Search option
    
 2. To Release Version 1.0
 
+   - GUI completed
    - Send attachments
    - Receiver part
-   - Mails list storage (mail to byte file?)
    
 3. Future releases
 
-   - Log in/ log out from UI
    - Signatures
    - Text formats
-   - Local seen or unseen mails at list
+   - Seen or unseen mails at list
