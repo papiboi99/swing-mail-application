@@ -17,10 +17,10 @@ public class SwingMailReceiverImpl implements SwingMailReceiver {
 
     public void receiveEmail(Properties properties) throws Exception, AuthenticationFailedException, MessagingException{
         //create session object
-        final String host = properties.getProperty("mail.imap.host");
-        final int port = Integer.parseInt(properties.getProperty("mail.imap.port"));
-        final String username = properties.getProperty("mail.user");
-        final String password = properties.getProperty("mail.password");
+        final String host = properties.getProperty("connection.imap.host");
+        final int port = Integer.parseInt(properties.getProperty("connection.imap.port"));
+        final String username = properties.getProperty("connection.user");
+        final String password = properties.getProperty("connection.password");
 
 
         Session session = Session.getDefaultInstance(properties, null);

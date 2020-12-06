@@ -1,5 +1,6 @@
 package controller;
 
+import api.SwingMailApi;
 import swingpanels.*;
 import utilities.SwingMailReceiver;
 import utilities.impl.SwingMailReceiverImpl;
@@ -10,12 +11,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Properties;
 
-public class SwingMailController {
+public class SwingMailController implements SwingMailApi {
 
-    //Create the window
+    // Create the window
     private JFrame frame;
 
     // Create the "container" panel of the "pages"
@@ -26,20 +29,17 @@ public class SwingMailController {
 
     // Create the top-level pages manager
     private CardLayout appCL;
-    // Create the mailbox pages manager
-    private CardLayout mailboxCL;
 
     public SwingMailController() {
 
-        // Create the CardLayout managers
+        // Create the CardLayout
         appCL = new CardLayout();
-        mailboxCL = new CardLayout();
 
         // Create the top-level Panels
         frame = new JFrame("MailBox by papiboi99");
         appPanel = new JPanel(appCL);
         loginPanel = new LoginPanel();
-        mailboxPanel = new MailboxPanel(mailboxCL);
+        mailboxPanel = new MailboxPanel();
 
         setupGUI();
 
@@ -47,36 +47,52 @@ public class SwingMailController {
         frame.setVisible(true);
     }
 
-    private void setupGUI() {
-
-        //Set up the window.
-        frame.add(appPanel);
-        frame.pack();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setVisible(true);
-
-        //
+    public void setupGUI() {
+        // Set up the card layout
         appPanel.add(loginPanel, "1");
         appPanel.add(mailboxPanel, "2");
-        appCL.show(appPanel, "1");
+        //appCL.show(appPanel, "1"); ------------------------------------------
+        setupMailbox(); // ---------------------------------------------------
 
-        //
-        setupLogin();
+        // Set up the the login menu
+        // setupLogin(); -------------------------------------------------------
 
+        // Set up the window.
+        frame.add(appPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
     public void setupLogin(){
+        // Login menu properties
+        frame.setResizable(false);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        dim = new Dimension(dim.width/5,dim.height/2);
+        frame.setPreferredSize(dim);
+        loginPanel.setPreferredSize(dim);
+
+        JTextField usernameField = loginPanel.getUsernameField();
+        JPasswordField passwordField = loginPanel.getPasswordField();
+        JButton loginButton = loginPanel.getLoginButton();
 
         // When Login button pressed check the credentials to go next
-        loginPanel.getLoginButton().addActionListener(new ActionListener() {
+        loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    Properties imapProperties = new Properties();
+                try (OutputStream output = new FileOutputStream("src/main/resources/connection.properties", true)){
+
+                    Properties prop = new Properties();
+
+                    prop.setProperty("connection.user", usernameField.getText());
+                    // The getPassword from JPasswordField returns a char array for security purpose
+                    // but we are not worried about security because the one who will do that work
+                    // is the java mail with imap connection
+                    prop.setProperty("connection.password", new String(passwordField.getPassword()));
+
                     InputStream input =
-                            SwingMailController.class.getClassLoader().getResourceAsStream("imap.properties");
+                            SwingMailController.class.getClassLoader().getResourceAsStream("connection.properties");
 
                     if (input == null) {
                         System.out.println("Sorry, unable to find config.properties");
@@ -84,39 +100,57 @@ public class SwingMailController {
                     }
 
                     //load a properties file from class path, inside static method
-                    imapProperties.load(input);
+                    prop.load(input);
 
                     SwingMailReceiver receiver = new SwingMailReceiverImpl();
-                    receiver.receiveEmail(imapProperties);
+                    receiver.receiveEmail(prop);
 
-                    appCL.show(appPanel, "2");
+                    setupMailbox();
 
                 } catch (AuthenticationFailedException ex) {
-                    System.out.println("Holaaaa1");
-                } catch (
-                        MessagingException ex) {
-                    System.out.println("Holaaaa2");
+                    // When wrong username or password
+                    loginPanel.authFailed();
+                    loginPanel.revalidate();
+                    frame.pack();
+                } catch (MessagingException ex) {
+                    // When no email address is written
+                    loginPanel.noAddressWritten();
+                    loginPanel.revalidate();
+                    frame.pack();
                 } catch (Exception ex) {
-                    System.out.println("Holaaaa3");
+                    System.out.println("Exception");
                 }
             }
         });
 
         // When in Username text field hits Enter set cursor in password
-        loginPanel.getUsernameField().addActionListener(new ActionListener() {
+        usernameField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                loginPanel.getPasswordField().requestFocusInWindow();
+                passwordField.requestFocusInWindow();
             }
         });
 
         // When in Password field hits Enter perform button Login pressed
-        loginPanel.getPasswordField().addActionListener(new ActionListener() {
+        passwordField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                loginPanel.getLoginButton().doClick();
+                loginButton.doClick();
             }
         });
+    }
+
+    public void setupMailbox(){
+
+        // Mailbox menu properties
+        frame.setResizable(true);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        dim = new Dimension(dim.width/2,dim.height/2);
+        frame.setPreferredSize(dim);
+        mailboxPanel.setPreferredSize(dim);
+
+        appCL.show(appPanel, "2");
+        mailboxPanel.revalidate();
     }
 
     /*

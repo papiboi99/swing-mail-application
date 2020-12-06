@@ -1,66 +1,133 @@
 package swingpanels;
 
+
 import javax.swing.*;
 import java.awt.*;
 
 
 public class LoginPanel extends JPanel {
+    // Define the layout configurations
+    private GridBagConstraints constraints;
 
     // Define components
     private JTextField usernameField;
     private JPasswordField passwordField;
-    private  JLabel titleLabel;
+    private JLabel titleLabel;
+    private JLabel logoLabel;
     private JLabel usernameLabel;
     private JLabel passwordLabel;
     private JButton loginButton;
+    private JLabel errorLabel;
+
+    // Boolean for avoid superposition
+    private boolean errorOccurredAlready;
 
     public LoginPanel() {
         // The login panel will be managed by GridBagLayout
         super(new GridBagLayout());
+        constraints = new GridBagConstraints();
 
         // Create components
         usernameField = new JTextField(25);
         passwordField = new JPasswordField(25);
-        usernameLabel = new JLabel("Username:");
+        usernameLabel = new JLabel("Email address:");
         passwordLabel = new JLabel("Password:");
         titleLabel = new JLabel("Sign in using your Gmail Account");
-        loginButton = new JButton("Login");
+        loginButton = new JButton("Sign in");
+        errorLabel = new JLabel();
 
-        createGUI();
+        // Creating and scaling the logo
+        logoLabel = new JLabel(new ImageIcon(new ImageIcon(getClass().getResource("/media/" +
+                "papiboi99_logo.png")).getImage().getScaledInstance(200, 100, Image.SCALE_SMOOTH)));
+
+        errorOccurredAlready = false;
+        setupGUI();
     }
 
-    public void createGUI(){
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.insets = new Insets(10, 10, 10, 10);
+    public void setupGUI(){
+        setBackground(Color.WHITE);
 
-        // Add the components to the panel (from upper to lower)
+        // Add the components to the panel
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
         constraints.gridy = 0;
-        constraints.gridwidth = 2;
         constraints.anchor = GridBagConstraints.CENTER;
+        constraints.insets = new Insets(40, 40, 2, 40);
+        add(logoLabel, constraints);
+
+        constraints.gridy = 1;
+        titleLabel.setFont(new java.awt.Font("Calibri", Font.BOLD,20));
+        constraints.insets = new Insets(2, 40, 10, 40);
         add(titleLabel, constraints);
 
-        constraints.gridx = 0;
-        constraints.gridy = 1;
-        constraints.gridwidth = 1;
-        constraints.anchor = GridBagConstraints.WEST;
+        constraints.gridy = 2;
+        constraints.anchor = GridBagConstraints.SOUTHWEST;
+        constraints.fill = GridBagConstraints.NONE;
+        usernameLabel.setFont(new java.awt.Font("Calibri", Font.PLAIN,14));
+        constraints.insets = new Insets(10, 40, 0, 40);
         add(usernameLabel, constraints);
 
-        constraints.gridx = 1;
-        add(usernameField, constraints);
-
-        constraints.gridx = 0;
-        constraints.gridy = 2;
+        constraints.gridy = 4;
+        passwordLabel.setFont(new java.awt.Font("Calibri", Font.PLAIN,14));
+        constraints.insets = new Insets(5, 40, 0, 40);
         add(passwordLabel, constraints);
 
-        constraints.gridx = 1;
+        constraints.gridy = 3;
+        constraints.ipady = 8;
+        constraints.anchor = GridBagConstraints.CENTER;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.insets = new Insets(0, 40, 5, 40);
+        add(usernameField, constraints);
+
+        constraints.gridy = 5;
+        constraints.insets = new Insets(0, 40, 10, 40);
         add(passwordField, constraints);
 
-        constraints.gridx = 0;
-        constraints.gridy = 3;
+        constraints.gridy = 6;
+        constraints.gridwidth = 2;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.CENTER;
+        constraints.insets = new Insets(5, 40, 40, 40);
+        loginButton.setFont(new java.awt.Font("Calibri", Font.BOLD,14));
+        add(loginButton, constraints);
+    }
+
+    public void authFailed (){
+        errorLabel.setText("<html><font color=red size=3><b>" +
+                "Incorrect username or password</b></html>");
+
+        constraints.gridy = 6;
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.insets = new Insets(2, 40, 10, 40);
+        add(errorLabel, constraints);
+
+        constraints.gridy = 7;
         constraints.gridwidth = 2;
         constraints.anchor = GridBagConstraints.CENTER;
+        constraints.insets = new Insets(5, 40, 40, 40);
         add(loginButton, constraints);
+
+        errorOccurredAlready = true;
+    }
+
+    public void noAddressWritten(){
+        errorLabel.setText("<html><font color=red size=3><b>" +
+                "Please write a valid email address</b></html>");
+
+        constraints.gridy = 6;
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.insets = new Insets(2, 40, 10, 40);
+        add(errorLabel, constraints);
+
+        constraints.gridy = 7;
+        constraints.gridwidth = 2;
+        constraints.anchor = GridBagConstraints.CENTER;
+        constraints.insets = new Insets(5, 40, 40, 40);
+        add(loginButton, constraints);
+
+        errorOccurredAlready = true;
     }
 
     public JTextField getUsernameField() {
@@ -74,5 +141,7 @@ public class LoginPanel extends JPanel {
     public JButton getLoginButton() {
         return loginButton;
     }
+
+
 
 }

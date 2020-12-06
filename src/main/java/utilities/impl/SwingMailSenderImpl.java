@@ -12,8 +12,8 @@ import java.util.Properties;
 //String toAddress, String subject, String message, File[] attachFiles
 public class SwingMailSenderImpl implements SwingMailSender {
     public void sendMail (Properties smtpProperties, Mail mail) {
-        final String userName = smtpProperties.getProperty("mail.user");
-        final String password = smtpProperties.getProperty("mail.password");
+        final String userName = smtpProperties.getProperty("connection.user");
+        final String password = smtpProperties.getProperty("connection.password");
 
         try {
             // creates a new session with an authenticator

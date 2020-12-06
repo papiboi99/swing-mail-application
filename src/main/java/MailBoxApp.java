@@ -15,7 +15,7 @@ public class MailBoxApp {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new SwingMailController();
+                SwingMailApi app = new SwingMailController();
             }
         });
     }
