@@ -1,71 +1,120 @@
 package utilities.impl;
 
-import api.dto.MailDTO;
+import controller.SwingMailController;
 import utilities.SwingMailReceiver;
 
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import javax.mail.AuthenticationFailedException;
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Store;
-
+import javax.mail.*;
+import javax.mail.search.SearchTerm;
 
 public class SwingMailReceiverImpl implements SwingMailReceiver {
 
-    public void receiveEmail(Properties properties) throws Exception, AuthenticationFailedException, MessagingException{
-        //create session object
+    private Folder folderInUse;
+    private Store store;
+    private Message[] messagesInUse;
+    private String folderInUseName;
+
+    private static final String INBOX = "Inbox";
+    private static final String SENT = "[Gmail]/Sent Mail";
+    private static final String SPAM = "[Gmail]/Spam";
+    private static final String TRASH = "[Gmail]/Trash";
+
+    @Override
+    public void connect(Properties properties) throws AuthenticationFailedException, MessagingException{
+        // Create session object
         final String host = properties.getProperty("connection.imap.host");
         final int port = Integer.parseInt(properties.getProperty("connection.imap.port"));
         final String username = properties.getProperty("connection.user");
         final String password = properties.getProperty("connection.password");
 
-
         Session session = Session.getDefaultInstance(properties, null);
 
-        //connect to message store
-        Store store = session.getStore("imaps");
+        // Connect to message store
+        store = session.getStore("imaps");
         store.connect(host, port, username, password);
+    }
 
-        //open the inbox folder
-        //podemos mirar de acceder a otras carpetas(spam,enviados..)
-        Folder inbox = store.getFolder("inbox");
-        inbox.open(Folder.READ_ONLY);
+    @Override
+    public Message[] receiveMailList(String folderName) throws MessagingException {
 
-        //fetch messages
-        Message[] messages = inbox.getMessages();
-
-        //read messages
-        //aqui hay que ver como retornamos las cosas para tratarlas mas alante
-        for (Message msg : messages) {
-            //falta añadir cada mail a la lista de mails
-            //(convertir antes a mail)
-            MailDTO mailDTO = new MailDTO();
-
-            mailDTO.setCc(msg.getRecipients(Message.RecipientType.CC));
-            mailDTO.setTo(msg.getRecipients(Message.RecipientType.TO));
-            mailDTO.setSubject(msg.getSubject());
-            mailDTO.setFrom(msg.getFrom());
-
-            //distinguir entre tipos multipart, debemos mirar que hacer con las imagenes
-            String messageContent = "";
-            String contentType = msg.getContentType();
-            if (contentType.contains("text/plain")
-                    || contentType.contains("text/html")) {
-                try {
-                    Object content = msg.getContent();
-                    if (content != null) {
-                        messageContent = content.toString();
-                    }
-                } catch (Exception ex) {
-                    messageContent = "[Error downloading content]";
-                }
-            }
-            mailDTO.setText(messageContent);
-
-            System.out.println(messageContent);
+        if (folderInUseName != null || folderInUseName == folderName){
+            System.out.println("folder");
+            folderInUse.close();
         }
+
+        folderInUseName = getProperFolderName(folderName);
+        folderInUse = store.getFolder(folderInUseName);
+
+        // Get the folder with permission to edit
+        folderInUse.open(Folder.READ_WRITE);
+
+        messagesInUse = folderInUse.getMessages();
+
+        return messagesInUse;
+    }
+
+    @Override
+    public Message[] search(String key) throws MessagingException{
+        SearchTerm term = new SearchTerm() {
+            public boolean match(Message message) {
+                try {
+                    if (message.getSubject().contains(key)) {
+                        return true;
+                    }
+                } catch (MessagingException ex) {
+                    ex.printStackTrace();
+                }
+                return false;
+            }
+        };
+
+        messagesInUse = folderInUse.search(term);
+
+        return messagesInUse;
+    }
+
+    @Override
+    public Message[] reload() throws MessagingException {
+        return receiveMailList(folderInUseName);
+    }
+
+    @Override
+    public Message getMessage(int id){
+        return messagesInUse[id];
+    }
+
+    @Override
+    public void moveToTrash(Message[] messagesToMove) throws MessagingException{
+        folderInUse.copyMessages(messagesToMove, store.getFolder(TRASH));
+    }
+
+    @Override
+    public void disconnect() throws MessagingException{
+        store.close();
+        folderInUse = null;
+        messagesInUse = null;
+        folderInUseName = null;
+    }
+
+    private String getProperFolderName(String folder){
+        String folderName = folderInUseName;
+        switch (folder){
+            case SwingMailController.INBOX:
+                folderName = INBOX;
+                break;
+            case SwingMailController.SENT:
+                folderName = SENT;
+                break;
+            case SwingMailController.SPAM:
+                folderName = SPAM;
+                break;
+            case SwingMailController.TRASH:
+                folderName = TRASH;
+                break;
+        }
+
+        return folderName;
     }
 }

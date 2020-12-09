@@ -5,6 +5,8 @@
 
 ### Gmail SMTP as our way to send mails
 
+**Only works for English(USA) Gmail version, if you have a different Gmail client lenguaje change it or it may fail**
+
 To use Gmail SMTP free server you will have to allow him the access from less secure external apps [here](https://myaccount.google.com/u/0/lesssecureapps?pli=1).
 
 An example format would be:

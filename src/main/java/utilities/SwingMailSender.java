@@ -10,5 +10,5 @@ import java.util.Properties;
 
 public interface SwingMailSender {
 
-    void sendMail (Properties smtpProperties, Mail mail);
+    void sendMail (Properties smtpProperties, Mail mail) throws AddressException, MessagingException, IOException;
 }

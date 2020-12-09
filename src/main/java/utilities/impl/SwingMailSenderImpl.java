@@ -11,18 +11,17 @@ import java.util.Properties;
 
 //String toAddress, String subject, String message, File[] attachFiles
 public class SwingMailSenderImpl implements SwingMailSender {
-    public void sendMail (Properties smtpProperties, Mail mail) {
-        final String userName = smtpProperties.getProperty("connection.user");
-        final String password = smtpProperties.getProperty("connection.password");
+    public void sendMail (Properties properties, Mail mail) throws AddressException, MessagingException, IOException{
+        final String userName = properties.getProperty("connection.user");
+        final String password = properties.getProperty("connection.password");
 
-        try {
             // creates a new session with an authenticator
             Authenticator auth = new Authenticator() {
                 public PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(userName, password);
                 }
             };
-            Session session = Session.getInstance(smtpProperties, auth);
+            Session session = Session.getInstance(properties, auth);
 
             // creates a new e-mail message
             Message msg = new MimeMessage(session);
@@ -32,7 +31,7 @@ public class SwingMailSenderImpl implements SwingMailSender {
                 toAddresses[i] = new InternetAddress(mail.getTo()[i]);
             }
 
-            if (mail.getCc() != null && mail.getCc().length > 0) {
+            if (mail.hasCc()) {
                 InternetAddress[] ccAddresses = new InternetAddress[mail.getCc().length];
                 for (int i = 0; i < mail.getCc().length; i++) {
                     ccAddresses[i] = new InternetAddress(mail.getCc()[i]);
@@ -54,8 +53,8 @@ public class SwingMailSenderImpl implements SwingMailSender {
             multipart.addBodyPart(messageBodyPart);
 
             // adds attachments
-            if (mail.getAttachments() != null && mail.getAttachments().length > 0) {
-                for (File aFile : mail.getAttachments()) {
+            if (mail.hasAttachments()) {
+                for (File aFile : mail.getAttachmentsFile()) {
                     MimeBodyPart attachPart = new MimeBodyPart();
 
                     try {
@@ -73,13 +72,6 @@ public class SwingMailSenderImpl implements SwingMailSender {
 
             // sends the e-mail
             Transport.send(msg);
-        } catch (AddressException e){
-
-        } catch (MessagingException e) {
-
-        } catch (IOException e) {
-
-        }
 
     }
 }

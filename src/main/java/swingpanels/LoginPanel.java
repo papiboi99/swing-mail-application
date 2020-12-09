@@ -19,9 +19,6 @@ public class LoginPanel extends JPanel {
     private JButton loginButton;
     private JLabel errorLabel;
 
-    // Boolean for avoid superposition
-    private boolean errorOccurredAlready;
-
     public LoginPanel() {
         // The login panel will be managed by GridBagLayout
         super(new GridBagLayout());
@@ -40,7 +37,6 @@ public class LoginPanel extends JPanel {
         logoLabel = new JLabel(new ImageIcon(new ImageIcon(getClass().getResource("/media/" +
                 "papiboi99_logo.png")).getImage().getScaledInstance(200, 100, Image.SCALE_SMOOTH)));
 
-        errorOccurredAlready = false;
         setupGUI();
     }
 
@@ -108,8 +104,6 @@ public class LoginPanel extends JPanel {
         constraints.anchor = GridBagConstraints.CENTER;
         constraints.insets = new Insets(5, 40, 40, 40);
         add(loginButton, constraints);
-
-        errorOccurredAlready = true;
     }
 
     public void noAddressWritten(){
@@ -126,8 +120,6 @@ public class LoginPanel extends JPanel {
         constraints.anchor = GridBagConstraints.CENTER;
         constraints.insets = new Insets(5, 40, 40, 40);
         add(loginButton, constraints);
-
-        errorOccurredAlready = true;
     }
 
     public JTextField getUsernameField() {
