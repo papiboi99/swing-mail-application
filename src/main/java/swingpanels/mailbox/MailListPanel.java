@@ -88,6 +88,7 @@ public class MailListPanel extends JPanel {
 
     public void reloadMailList(List<Mail> mailList){
         // Reloads the table
+        Collections.reverse(mailList);
         mailListTableModel = new MailListTableModel(mailList);
         mailListTable.setModel(mailListTableModel);
 

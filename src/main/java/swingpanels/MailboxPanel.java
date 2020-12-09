@@ -8,6 +8,7 @@ import swingpanels.mailbox.MailSenderPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collections;
 import java.util.List;
 
 public class MailboxPanel extends JPanel {
