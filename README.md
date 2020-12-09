@@ -39,8 +39,8 @@ _Porperties file:_
     mail.imap.host=imap.gmail.com
     mail.imap.port=993
     (this ones will be written by the app)
-    //mail.user=papiboi99.sad@gmail.com 
-    //mail.password=papiboi99-
+    //mail.user=mail
+    //mail.password=password
 
 ## HOW IT WORKS?
 
