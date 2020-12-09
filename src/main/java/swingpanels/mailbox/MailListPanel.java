@@ -1,13 +1,11 @@
 package swingpanels.mailbox;
 
-import controller.SwingMailController;
 import model.Mail;
 import model.MailListTableModel;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

@@ -147,9 +147,6 @@ public class MailPanel extends JPanel {
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, constraints);
 
-        System.out.println(mail.hasAttachmentNames());
-        System.out.println(mail.getSubject());
-
         if(mail.hasAttachmentNames()){
             constraints.gridx = 2;
             constraints.gridy = 0;

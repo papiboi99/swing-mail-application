@@ -122,7 +122,7 @@ public class Mail {
     public Date getDate() { return date; }
     public void setDate(Date date) { this.date = date; }
     public String dateToString(){
-        DateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy hh:mm");
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
         return dateFormat.format(this.date);
     }
 
