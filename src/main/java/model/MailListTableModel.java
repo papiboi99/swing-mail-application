@@ -56,27 +56,31 @@ public class MailListTableModel extends AbstractTableModel {
         } else if (2 == columnIndex) {
             return row.getSubject();
         } else if (3 == columnIndex) {
-            List<String> extensionIcon = new ArrayList<String>();
+            if (row.hasAttachmentNames()){
+                List<String> extensionIcon = new ArrayList<String>();
 
-            for (String type : row.getAttachmentsType()) {
-                if (Arrays.asList(PICTURE).contains(type)) {
-                    extensionIcon.add("\uD83D\uDCF7");
+                for (String type : row.getAttachmentsType()) {
+                    if (Arrays.asList(PICTURE).contains(type.toLowerCase())) {
+                        extensionIcon.add("\uD83D\uDCF7");
+                    }
+                    else if (Arrays.asList(VIDEO).contains(type.toLowerCase())) {
+                        extensionIcon.add("\uD83C\uDFAC");
+                    }
+                    else if (Arrays.asList(AUDIO).contains(type.toLowerCase())) {
+                        extensionIcon.add("\uD83C\uDFB5");
+                    }
+                    else if (Arrays.asList(WORK_FILE).contains(type.toLowerCase())) {
+                        extensionIcon.add("\uD83D\uDCC4");
+                    }
+                    else {
+                        extensionIcon.add("\uD83D\uDCCE");
+                    }
                 }
-                else if (Arrays.asList(VIDEO).contains(type)) {
-                    extensionIcon.add("\uD83C\uDFAC");
-                }
-                else if (Arrays.asList(AUDIO).contains(type)) {
-                    extensionIcon.add("\uD83C\uDFB5");
-                }
-                else if (Arrays.asList(WORK_FILE).contains(type)) {
-                    extensionIcon.add("\uD83D\uDCC4");
-                }
-                else {
-                    extensionIcon.add("\uD83D\uDCCE");
-                }
+                return extensionIcon.toString().replace("[", "").
+                        replace("]", "").replace(",", "");
+            }else{
+                return null;
             }
-            return extensionIcon.toString().replace("[", "").
-                    replace("]", "").replace(",", "");
         } else if (4 == columnIndex) {
             return row.dateToString();
 
@@ -102,7 +106,7 @@ public class MailListTableModel extends AbstractTableModel {
             row.setSubject((String) aValue);
         }
         else if(3 == columnIndex) {
-            row.setAttachments((String[]) aValue);
+            row.setAttachmentsName((String[]) aValue);
         }
         else if(3 == columnIndex) {
             row.setDate((Date) aValue);

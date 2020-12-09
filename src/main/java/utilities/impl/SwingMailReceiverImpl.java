@@ -24,10 +24,10 @@ public class SwingMailReceiverImpl implements SwingMailReceiver {
     @Override
     public void connect(Properties properties) throws AuthenticationFailedException, MessagingException{
         // Create session object
-        final String host = properties.getProperty("connection.imap.host");
-        final int port = Integer.parseInt(properties.getProperty("connection.imap.port"));
-        final String username = properties.getProperty("connection.user");
-        final String password = properties.getProperty("connection.password");
+        final String host = properties.getProperty("mail.imap.host");
+        final int port = Integer.parseInt(properties.getProperty("mail.imap.port"));
+        final String username = properties.getProperty("mail.user");
+        final String password = properties.getProperty("mail.password");
 
         Session session = Session.getDefaultInstance(properties, null);
 
@@ -40,7 +40,6 @@ public class SwingMailReceiverImpl implements SwingMailReceiver {
     public Message[] receiveMailList(String folderName) throws MessagingException {
 
         if (folderInUseName != null || folderInUseName == folderName){
-            System.out.println("folder");
             folderInUse.close();
         }
 

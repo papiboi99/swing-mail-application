@@ -4,8 +4,6 @@ import model.Mail;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,12 +85,14 @@ public class MailSenderPanel extends JPanel {
         constraints.gridwidth = 1;
         constraints.gridheight = 1;
         constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.EAST;
         constraints.insets = new Insets(5, 5, 5, 5);
         add(labelTo, constraints);
 
         constraints.gridx = 1;
         constraints.weightx = 1.0;
         constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.anchor = GridBagConstraints.WEST;
         add(fieldTo, constraints);
 
         //campo CC
@@ -100,10 +100,12 @@ public class MailSenderPanel extends JPanel {
         constraints.gridy = 1;
         constraints.weightx = 0.0;
         constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.EAST;
         add(labelCC, constraints);
 
         constraints.gridx = 1;
         constraints.weightx = 1.0;
+        constraints.anchor = GridBagConstraints.WEST;
         constraints.fill = GridBagConstraints.HORIZONTAL;
         add(fieldCC, constraints);
 
@@ -112,12 +114,13 @@ public class MailSenderPanel extends JPanel {
         constraints.gridy = 2;
         constraints.weightx = 0.0;
         constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.EAST;
         add(labelSubject, constraints);
 
         constraints.gridx = 1;
         constraints.weightx = 1.0;
         constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.insets = new Insets(10, 0, 0, 0);
+        constraints.anchor = GridBagConstraints.WEST;
         add(fieldSubject, constraints);
 
         //campo attachment // probamos seleccionar archivo
@@ -125,12 +128,14 @@ public class MailSenderPanel extends JPanel {
         constraints.gridy = 3;
         constraints.weightx = 0.0;
         constraints.fill = GridBagConstraints.NONE;
-        constraints.insets = new Insets(5, 5, 5, 5);
+        constraints.anchor = GridBagConstraints.EAST;
         add(labelAttachment, constraints);
 
         constraints.gridx = 1;
         constraints.weightx = 1.0;
+        constraints.anchor = GridBagConstraints.WEST;
         constraints.fill = GridBagConstraints.HORIZONTAL;
+        fieldAttachment.setEditable(false);
         add(fieldAttachment, constraints);
 
         constraints.gridx = 2;
@@ -143,6 +148,7 @@ public class MailSenderPanel extends JPanel {
         constraints.gridy = 0;
         constraints.ipady = 10;
         constraints.ipadx = 20;
+        constraints.anchor = GridBagConstraints.CENTER;
         add(sendButton, constraints);
 
         //campo boton cancelar
@@ -185,15 +191,14 @@ public class MailSenderPanel extends JPanel {
     }
     public JTextField getFieldAttachment() { return fieldAttachment; }
     public JFileChooser getAttachment() { return attachment; }
-    public File[] getFiles() { return fileList.toArray(new File[0]); }
+    public List<File> getFilesList() { return fileList; }
     public void addFile(File file){
         fileList.add(file);
-        String fileName = file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf("\\") + 1);
 
         if(attachmentText == ""){
-            attachmentText = fileName;
+            attachmentText = file.getName();
         }else{
-            attachmentText += ", " + fileName;
+            attachmentText += ", " + file.getName();
         }
         fieldAttachment.setText(this.attachmentText);
     }

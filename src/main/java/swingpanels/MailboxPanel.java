@@ -125,8 +125,6 @@ public class MailboxPanel extends JPanel {
         constraints.ipadx = 0;
         constraints.ipady = 0;
         constraints.insets = new Insets(0, 40, 0, 0);
-        //hacer algo para personalizar la JList (cellrenderer??)
-        //foldersList
         add(foldersList, constraints);
 
         subPanel = new JPanel(new GridBagLayout());
@@ -192,8 +190,6 @@ public class MailboxPanel extends JPanel {
             contentModePanel.add(mailTabbedPane, "2");
             contentModeCL.show(contentModePanel, "2");
             contentModePanelShownNum = "2";
-
-            System.out.println("Tabbed");
 
             subPanel.validate();
             subPanel.repaint();

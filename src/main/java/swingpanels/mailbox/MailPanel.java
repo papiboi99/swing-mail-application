@@ -4,7 +4,6 @@ import model.Mail;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 
 public class MailPanel extends JPanel {
 
@@ -61,6 +60,7 @@ public class MailPanel extends JPanel {
 
         constraints.gridx = 1;
         constraints.gridy = 0;
+        constraints.anchor = GridBagConstraints.WEST;
         add(replyButton,constraints);
 
         //subject field
@@ -68,6 +68,7 @@ public class MailPanel extends JPanel {
         constraints.gridy = 1;
         constraints.weightx = 1.0;
         constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.anchor = GridBagConstraints.CENTER;
         fieldSubject.setEditable(false);
         constraints.insets = new Insets(10, 0, 2, 20);
         add(fieldSubject,constraints);
@@ -76,6 +77,7 @@ public class MailPanel extends JPanel {
         constraints.weightx = 0.0;
         constraints.weighty = 0.0;
         constraints.fill = GridBagConstraints.VERTICAL;
+        constraints.anchor = GridBagConstraints.EAST;
         constraints.insets = new Insets(0, 0, 0, 0);
         add(labelSubject, constraints);
 
@@ -83,10 +85,10 @@ public class MailPanel extends JPanel {
         constraints.gridx=2;
         constraints.gridy = 2;
         constraints.gridheight = 2;
-        constraints.weightx = 0.0;
+        constraints.weightx = 1.0;
         constraints.weighty = 0.0;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.anchor = GridBagConstraints.CENTER;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.EAST;
         constraints.insets = new Insets(10, 10, 2, 20);
         add(labelDate,constraints);
 
@@ -96,6 +98,7 @@ public class MailPanel extends JPanel {
         constraints.weightx = 1.0;
         constraints.gridheight = 1;
         constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.anchor = GridBagConstraints.CENTER;
         fieldFrom.setEditable(false);
         constraints.insets = new Insets(2, 0, 2, 20);
         add(fieldFrom,constraints);
@@ -103,7 +106,8 @@ public class MailPanel extends JPanel {
         constraints.gridx = 0;
         constraints.weightx = 0.0;
         constraints.weighty = 0.0;
-        constraints.fill = GridBagConstraints.VERTICAL;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.EAST;
         constraints.insets = new Insets(0, 0, 0, 0);
         add(labelFrom, constraints);
 
@@ -112,6 +116,7 @@ public class MailPanel extends JPanel {
         constraints.gridy = 3;
         constraints.weightx = 1.0;
         constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.anchor = GridBagConstraints.CENTER;
         fieldCC.setEditable(false);
         constraints.insets = new Insets(2, 0, 2, 20);
         add(fieldCC,constraints);
@@ -119,7 +124,8 @@ public class MailPanel extends JPanel {
         constraints.gridx = 0;
         constraints.weightx = 0.0;
         constraints.weighty = 0.0;
-        constraints.fill = GridBagConstraints.VERTICAL;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.EAST;
         constraints.insets = new Insets(0, 0, 0, 0);
         add(labelCC, constraints);
 
@@ -130,35 +136,38 @@ public class MailPanel extends JPanel {
         constraints.gridwidth = 3;
         constraints.weightx = 1.0;
         constraints.weighty = 1.0;
+        constraints.anchor = GridBagConstraints.CENTER;
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.insets = new Insets(2, 0, 2, 20);
         textAreaMessage.setEditable(false);
         textAreaMessage.setLineWrap(true);
         textAreaMessage.setWrapStyleWord(true);
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.insets = new Insets(2, 0, 2, 20);
         JScrollPane scrollPane = new JScrollPane(textAreaMessage);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, constraints);
 
-        if(mail.hasAttachments()){
+        System.out.println(mail.hasAttachmentNames());
+        System.out.println(mail.getSubject());
+
+        if(mail.hasAttachmentNames()){
             constraints.gridx = 2;
             constraints.gridy = 0;
             constraints.weightx = 1.0;
             constraints.weighty = 0.0;
-            constraints.gridheight = 1;
-            constraints.gridwidth = 1;
             constraints.anchor = GridBagConstraints.EAST;
-            constraints.fill = GridBagConstraints.NONE;
+            constraints.fill = GridBagConstraints.HORIZONTAL;
+            fieldAttachment.setEditable(false);
+            constraints.insets = new Insets(2, 20, 5, 20);
             add(fieldAttachment, constraints);
 
             constraints.gridx = 2;
             constraints.gridy = 1;
             constraints.weightx = 0.0;
             constraints.weighty = 0.0;
-            constraints.gridheight = 1;
-            constraints.gridwidth = 1;
             constraints.anchor = GridBagConstraints.CENTER;
             constraints.fill = GridBagConstraints.NONE;
+            constraints.insets = new Insets(20, 20, 5, 20);
             add(downloadAttachButton, constraints);
         }
     }

@@ -12,8 +12,8 @@ import java.util.Properties;
 //String toAddress, String subject, String message, File[] attachFiles
 public class SwingMailSenderImpl implements SwingMailSender {
     public void sendMail (Properties properties, Mail mail) throws AddressException, MessagingException, IOException{
-        final String userName = properties.getProperty("connection.user");
-        final String password = properties.getProperty("connection.password");
+        final String userName = properties.getProperty("mail.user");
+        final String password = properties.getProperty("mail.password");
 
             // creates a new session with an authenticator
             Authenticator auth = new Authenticator() {
@@ -53,7 +53,7 @@ public class SwingMailSenderImpl implements SwingMailSender {
             multipart.addBodyPart(messageBodyPart);
 
             // adds attachments
-            if (mail.hasAttachments()) {
+            if (mail.hasAttachmentFiles()) {
                 for (File aFile : mail.getAttachmentsFile()) {
                     MimeBodyPart attachPart = new MimeBodyPart();
 

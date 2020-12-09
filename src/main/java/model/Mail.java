@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class Mail {
 
@@ -15,7 +16,7 @@ public class Mail {
     private String text;
     private boolean selected;
     private Date date;
-    private String[] attachments;
+    private String[] attachmentsName;
     private File[] attachmentsFile;
     private int id;
 
@@ -60,33 +61,55 @@ public class Mail {
     public String getText() { return text; }
     public void setText(String text) { this.text = text; }
 
-    public String[] getAttachments() { return attachments; }
-    public void setAttachments(String[] attachments) { this.attachments = attachments; }
+    public String[] getAttachmentsName() { return attachmentsName; }
+    public void setAttachmentsName(String[] attachmentsName) { this.attachmentsName = attachmentsName; }
     public String[] getAttachmentsType() {
-        String[] attachmentsType = new String[attachments.length];
 
-        int i = 0;
-        for (String name: attachments){
-            attachmentsType[i] = name.substring(name.indexOf(".")+1);
-            i++;
+        if (hasAttachmentNames()){
+            String[] attachmentsType = new String[attachmentsName.length];
+
+            int i = 0;
+            for (String name: attachmentsName){
+                attachmentsType[i] = name.substring(name.indexOf(".")+1);
+                i++;
+            }
+            return attachmentsType;
+        }else{
+            return null;
         }
-        return attachmentsType;
     }
     public File[] getAttachmentsFile() { return attachmentsFile; }
     public void setAttachmentsFile(File[] attachmentsFile) { this.attachmentsFile = attachmentsFile; }
-    public String attachmentsToString(){
-        String atString = "";
-        for (String atAux : attachments){
-            if (atString == ""){
-                atString += atAux;
-            }else{
-                atString += ", " + atAux;
-            }
+    public void setAttachmentsFileList(List<File> attachmentsFileList) {
+        attachmentsFile = new File[attachmentsFileList.size()];
+        for (int i = 0; i < attachmentsFileList.size(); i++){
+            attachmentsFile[i] = attachmentsFileList.get(i);
         }
-        return atString;
     }
-    public boolean hasAttachments(){
-        if (attachments != null && attachments.length > 0) {
+    public String attachmentsToString(){
+        if(hasAttachmentNames()){
+            String atString = "";
+            for (String atAux : attachmentsName){
+                if (atString == ""){
+                    atString += atAux;
+                }else{
+                    atString += ", " + atAux;
+                }
+            }
+            return atString;
+        }else{
+            return null;
+        }
+    }
+    public boolean hasAttachmentFiles(){
+        if (attachmentsFile != null && attachmentsFile.length > 0) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+    public boolean hasAttachmentNames(){
+        if (attachmentsName != null){
             return true;
         }else{
             return false;

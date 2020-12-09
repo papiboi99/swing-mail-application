@@ -11,6 +11,7 @@ import utilities.SwingMailSender;
 import utilities.impl.SwingMailReceiverImpl;
 import utilities.impl.SwingMailSenderImpl;
 
+import javax.imageio.ImageIO;
 import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeBodyPart;
@@ -20,6 +21,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,6 +50,10 @@ public class SwingMailController implements SwingMailApi {
     // Define the receiver and the sender
     private SwingMailReceiver mailReceiver;
     private SwingMailSender mailSender;
+
+    // Define progress monitor
+    private ProgressMonitor progressMonitor;
+    private Download download;
 
     // Define folders
     public static final String DEFAULT_FOLDER = "Inbox";
@@ -96,6 +103,10 @@ public class SwingMailController implements SwingMailApi {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
+
+        Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/media/" +
+                "papiboi99_icon.png"));
+        frame.setIconImage(image);
     }
 
     public void setupLogin(){
@@ -122,19 +133,22 @@ public class SwingMailController implements SwingMailApi {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try (OutputStream output = new FileOutputStream("src/main/resources/connection.properties", true)){
+                try (OutputStream output = new FileOutputStream("src/main/resources/mail.properties", true)){
 
-                    prop.setProperty("connection.user", usernameField.getText());
+                    prop.setProperty("mail.user", usernameField.getText());
                     // The getPassword from JPasswordField returns a char array for security purpose
                     // but we are not worried about security because the one who will do that work
                     // is the java mail with imap connection
-                    prop.setProperty("connection.password", new String(passwordField.getPassword()));
+                    prop.setProperty("mail.password", new String(passwordField.getPassword()));
 
                     InputStream input =
-                            SwingMailController.class.getClassLoader().getResourceAsStream("connection.properties");
+                            SwingMailController.class.getClassLoader().getResourceAsStream("mail.properties");
 
                     if (input == null) {
-                        System.out.println("Sorry, unable to find config.properties");
+                        JOptionPane.showMessageDialog(null,
+                                "Sorry, unable to find config.properties",
+                                "Login error",
+                                JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
@@ -157,7 +171,7 @@ public class SwingMailController implements SwingMailApi {
                     loginPanel.revalidate();
                     frame.pack();
                 } catch (IOException ex) {
-                    System.out.println("Exception");
+                    ex.printStackTrace();
                 }
             }
         });
@@ -360,7 +374,6 @@ public class SwingMailController implements SwingMailApi {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    System.out.println("hola");
                     Message[] reloadedMessages = mailReceiver.reload();
                     mailboxPanel.setupMailListPanel(messagesToMailList(reloadedMessages));
                 } catch (Exception exception) {
@@ -483,13 +496,11 @@ public class SwingMailController implements SwingMailApi {
 
                     mail.setTo(to.split(";"));
                     mail.setCc(fieldCC.getText().split(";"));
-                    mail.setFromAddress(prop.getProperty("connection.user"));
+                    mail.setFromAddress(prop.getProperty("mail.user"));
                     mail.setSubject(subject);
                     mail.setDate(new Date());
                     mail.setText(textAreaMessage.getText());
-
-                    mail.setAttachmentsFile(actualSenderPanel.getFiles());
-
+                    mail.setAttachmentsFileList(actualSenderPanel.getFilesList());
                     sendMail(mail);
 
                     JOptionPane.showMessageDialog(null,
@@ -527,8 +538,10 @@ public class SwingMailController implements SwingMailApi {
 
         actualSenderPanel.getInfo().addMouseListener((new MouseAdapter() {
             public void mouseEntered(MouseEvent evt) {
-                JOptionPane.showOptionDialog(null, "Separate with ; " +
-                                "diferent mail recivers", "INFO", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                JOptionPane.showOptionDialog(null,
+                        "Make sure you separate with ; when multi addressing, without blank spaces!" +
+                         "\n Example: user1@mail.com;user2@mail.com", "INFO",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
                         null, new Object[]{}, null);
             }
         }));
@@ -553,26 +566,40 @@ public class SwingMailController implements SwingMailApi {
                 String directory = "";
                 saveAttachment.setDialogTitle("Choose a directory to save your files: ");
                 saveAttachment.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                int sD=saveAttachment.showSaveDialog(null);
-                if(sD == JFileChooser.APPROVE_OPTION){
-                    if(saveAttachment.getSelectedFile().isDirectory()){
+                int sD = saveAttachment.showSaveDialog(null);
+
+                if (sD == JFileChooser.APPROVE_OPTION) {
+                    if (saveAttachment.getSelectedFile().isDirectory()) {
                         directory = saveAttachment.getSelectedFile().toString();
+
+                        progressMonitor = new ProgressMonitor(frame,
+                                "",
+                                "Starting download", 0, 100);
+                        progressMonitor.setProgress(0);
+                        download = new Download(directory, mail);
+                        download.addPropertyChangeListener(new PropertyChangeListener() {
+                            @Override
+                            public void propertyChange(PropertyChangeEvent evt) {
+                                if ("progress" == evt.getPropertyName() ) {
+                                    int progress = (int) evt.getNewValue();
+                                    progressMonitor.setProgress(progress);
+                                    String message =
+                                            String.format("Completed %d%%.\n", progress);
+                                    progressMonitor.setNote(message);
+                                    if (progressMonitor.isCanceled() || download.isDone()) {
+                                        Toolkit.getDefaultToolkit().beep();
+                                        if (progressMonitor.isCanceled()) {
+                                            download.cancel(true);
+                                            progressMonitor.setNote("Task canceled.\n");
+                                        } else {
+                                            progressMonitor.setNote("Download completed.\n");
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        download.execute();
                     }
-                }
-                try {
-                    downloadFiles(directory, mail);
-
-                    JOptionPane.showMessageDialog(null,
-                            "Downloaded! Check your directory.", "Download info",
-                            JOptionPane.INFORMATION_MESSAGE);
-                    mailboxPanel.closeTab();
-
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                    JOptionPane.showMessageDialog(null,
-                            "An error has occurred while trying to download, sorry try again",
-                            "Download failed",
-                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -586,25 +613,59 @@ public class SwingMailController implements SwingMailApi {
 
     }
 
-    public void downloadFiles(String directory, Mail mail) throws MessagingException, IOException{
+    private class Download extends SwingWorker <Void, Void> {
 
-        Message message = mailReceiver.getMessage(mail.getId());
+        private String directory;
+        private Mail mail;
 
-        String contentType = message.getContentType();
-        if (contentType.contains("multipart")) {
-            // content may contain attachments
-            Multipart multiPart = (Multipart) message.getContent();
-            int numberOfParts = multiPart.getCount();
-            for (int partCount = 0; partCount < numberOfParts; partCount++) {
-                MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
-                if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
-                    // this part is attachment
-                    String fileName = part.getFileName();
-                    part.saveFile(directory + File.separator + fileName);
-                }
-            }
+        public Download (String directory, Mail mail){
+            this.directory = directory;
+            this.mail = mail;
         }
 
+        @Override
+        public Void doInBackground() {
+            try {
+                int progress = 0;
+                setProgress(0);
+                Message message = mailReceiver.getMessage(mail.getId());
+                String contentType = message.getContentType();
+                Thread.sleep(500);
+                setProgress(10);
+
+                if (contentType.contains("multipart")) {
+                    // content may contain attachments
+                    Multipart multiPart = (Multipart) message.getContent();
+                    int numberOfParts = multiPart.getCount();
+                    int progressParts = 80/numberOfParts;
+                    for (int partCount = 0; partCount < numberOfParts; partCount++) {
+                        MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
+                        if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+                            // this part is attachment
+                            String fileName = part.getFileName();
+                            part.saveFile(directory + File.separator + fileName);
+                        }
+                        progress = progress + progressParts;
+                        setProgress(progress);
+                    }
+                }
+                setProgress(99);
+                Thread.sleep(800);
+            }catch (Exception exception){
+                exception.printStackTrace();
+                JOptionPane.showMessageDialog(null,
+                        "An error has occurred while trying to download, sorry try again",
+                        "Download failed",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+            return null;
+        }
+
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            progressMonitor.setProgress(100);
+        }
     }
 
     public void sendMail(Mail mail) throws AddressException, MessagingException, IOException {
@@ -656,7 +717,9 @@ public class SwingMailController implements SwingMailApi {
                         mail.setText(content.substring(content.indexOf(":")+1));
                     }
                 }
-                mail.setAttachments(attachmentsName.toArray(new String[0]));
+                if (!attachmentsName.isEmpty()){
+                    mail.setAttachmentsName(attachmentsName.toArray(new String[0]));
+                }
             } else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
                 Object msgContent = msg.getContent();
                 if (msgContent != null) {
@@ -701,26 +764,6 @@ public class SwingMailController implements SwingMailApi {
             }
         }
         return listAddress.toArray(new String[0]);
-    }
-
-    private int getFolderNum(String folder){
-        int folderNum = DEFAULT_FOLDER_NUM;
-        switch (folder){
-            case INBOX:
-                folderNum = INBOX_NUM;
-                break;
-            case SENT:
-                folderNum = SENT_NUM;
-                break;
-            case SPAM:
-                folderNum = SPAM_NUM;
-                break;
-            case TRASH:
-                folderNum = TRASH_NUM;
-                break;
-        }
-
-        return folderNum;
     }
 
 

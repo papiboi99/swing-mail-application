@@ -7,6 +7,8 @@ import model.MailListTableModel;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MailListPanel extends JPanel {
@@ -31,9 +33,9 @@ public class MailListPanel extends JPanel {
         constraints = new GridBagConstraints();
 
         // Create the table and utilities
+        Collections.reverse(mailList);
         mailListTableModel = new MailListTableModel(mailList);
         mailListTable = new JTable(mailListTableModel);
-        scrollPane = new JScrollPane(mailListTable);
 
         // The popup menu when right click
         actionPopup = new JPopupMenu();
@@ -60,12 +62,12 @@ public class MailListPanel extends JPanel {
         constraints.weighty = 0.0;
         constraints.gridwidth = 1;
         constraints.fill = GridBagConstraints.NONE;
-        constraints.insets = new Insets(0, 20, 0, 5);
+        constraints.insets = new Insets(0, 20, 5, 5);
         add(reloadButton, constraints);
 
         constraints.gridy = 0;
         constraints.gridx = 1;
-        constraints.insets = new Insets(0, 20, 0, 5);
+        constraints.insets = new Insets(0, 20, 5, 5);
         add(deleteButton, constraints);
 
         constraints.gridy = 1;
@@ -78,7 +80,12 @@ public class MailListPanel extends JPanel {
         mailListTable.setTableHeader(null);
         mailListTable.setShowVerticalLines(false);
         mailListTable.setDefaultRenderer(String.class, new CustomCellRenderer());
+        scrollPane = new JScrollPane(mailListTable);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, constraints);
+        validate();
+        repaint();
     }
 
     public void reloadMailList(List<Mail> mailList){
